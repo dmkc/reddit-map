@@ -1,7 +1,7 @@
 $(function(){
-    // Lens panel
-    var lens = $(document.createElement('div')).prop('id', 'reddit-lens'),
-        content = $(document.createElement('div')).addClass('lens-content'),
+    // map panel
+    var map = $(document.createElement('div')).prop('id', 'reddit-map'),
+        content = $(document.createElement('div')).addClass('map-content'),
         height_ratio = 0,
         
    // Comment DOM nodes
@@ -10,9 +10,9 @@ $(function(){
             $.each( nodes, function(){
                 var $n = $(this),
                     comment_children = $n.children('.child').children('.sitetable').children('.comment'),
-                    comment  = $(document.createElement('div')).addClass('lens-comment'),
-                    node     = $( document.createElement('div')).addClass('lens-comment-node'), 
-                    children = $( document.createElement('div')).addClass('lens-comment-children');
+                    comment  = $(document.createElement('div')).addClass('reddit-map-comment'),
+                    node     = $( document.createElement('div')).addClass('reddit-map-comment-node'), 
+                    children = $( document.createElement('div')).addClass('reddit-map-comment-children');
 
                 comment.append( node ).append( children );
                 // keep track of the original DOM node for the comment
@@ -27,13 +27,13 @@ $(function(){
             });
         };
 
-    lens.append( content );
-    lens.insertBefore( $(document.body).children().eq(0));
+    map.append( content );
+    map.insertBefore( $(document.body).children().eq(0));
     parse_comments( content, top_level_comments );
 
     height_ratio = content.height() / $(document).height();
 
-    // Scroll lens proportionally with viewport
+    // Scroll map proportionally with viewport
     $(document).scroll( function() {
         var offset = ( window.pageYOffset + $(window).height()/2 ) * height_ratio;
 

@@ -4428,8 +4428,8 @@ tr.gold-accent + tr > td {
  display:inline-block;
 }
 
-/* Reddit lens */
-#reddit-lens {
+/* Reddit map */
+#reddit-map {
     position: fixed;
     z-index: 1000;
     top: 0;
@@ -4439,11 +4439,11 @@ tr.gold-accent + tr > td {
     background: white;
     padding: 5px 0 0 10px;
 }
-.lens-comment {
+.reddit-map-comment {
     border-left: 1px dotted #ccc;
 }
 
-.lens-comment-node {
+.reddit-map-comment-node {
     width: 100%;
     height: 5px;
     background: #aaa;
@@ -4452,6 +4452,6 @@ tr.gold-accent + tr > td {
     cursor: pointer;
 }
 
-.lens-comment-children {
+.reddit-map-comment-children {
     margin-left: 7px;
 }
