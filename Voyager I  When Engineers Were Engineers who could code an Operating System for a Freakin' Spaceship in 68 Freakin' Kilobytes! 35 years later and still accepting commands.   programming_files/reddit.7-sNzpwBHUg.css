@@ -4430,11 +4430,11 @@ tr.gold-accent + tr > td {
 
 /* Reddit lens */
 #reddit-lens {
-    position: absolute;
+    position: fixed;
+    z-index: 1000;
     top: 0;
     right: 0;
-    width: 130px;
-    z-index: 1000;
+    width: 100px;
     box-shadow: -1px -1px 7px #555;
     background: white;
     padding: 5px 0 0 10px;
@@ -4449,6 +4449,7 @@ tr.gold-accent + tr > td {
     background: #aaa;
     border-radius: 2px;
     margin-bottom: 3px;
+    cursor: pointer;
 }
 
 .lens-comment-children {
