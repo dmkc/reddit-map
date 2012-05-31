@@ -4439,8 +4439,27 @@ tr.gold-accent + tr > td {
     background: white;
     padding: 5px 0 0 10px;
 }
+
+.reddit-map-content {
+    position: relative;
+}
+
 .reddit-map-comment {
     border-left: 1px dotted #ccc;
+}
+
+.reddit-map-lens {
+    width: 120px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+    border: 1px solid black;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    cursor: pointer;
+    z-index: 1001;
+    border-radius: 3px;
 }
 
 .reddit-map-comment-node {
@@ -4449,7 +4468,6 @@ tr.gold-accent + tr > td {
     background: #aaa;
     border-radius: 2px;
     margin-bottom: 3px;
-    cursor: pointer;
 }
 
 .reddit-map-comment-children {
