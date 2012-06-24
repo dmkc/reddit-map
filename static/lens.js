@@ -99,8 +99,8 @@ $(function(){
             if ( dragging ) {
                 dragging = false;
                 var lens_pos = lens.position(),
-                    pos = ( lens_pos.top + lens.height() ) * Math.floor( 
-                            ( $(document).height() / $(window).height() ) );
+                    pos = lens_pos.top  * Math.floor( 
+                            ( $(document).height() / ($(window).height() - lens.height()) ) );
 
                 window.scrollTo( 0, pos );
                 //$('html,body').animate( { scrollTop: pos }, 0 );
