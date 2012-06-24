@@ -4448,18 +4448,32 @@ tr.gold-accent + tr > td {
     border-left: 1px dotted #ccc;
 }
 
+.reddit-map-lens-wrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+
 .reddit-map-lens {
     width: 120px;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     height: 100px;
     border: 1px solid black;
     border-top: 2px solid black;
     border-bottom: 2px solid black;
-    cursor: pointer;
+    cursor:hand;
+    cursor:grab;
+    cursor:-moz-grab;
+    cursor:-webkit-grab;
     z-index: 1001;
     border-radius: 3px;
+}
+.reddit-map-lens.grabbing {
+    cursor:grabbing;
+    cursor:-moz-grabbing;
+    cursor:-webkit-grabbing;
 }
 
 .reddit-map-comment-node {
