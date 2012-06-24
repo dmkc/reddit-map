@@ -4463,9 +4463,17 @@ tr.gold-accent + tr > td {
     border: 1px solid black;
     border-top: 2px solid black;
     border-bottom: 2px solid black;
-    cursor: pointer;
+    cursor:hand;
+    cursor:grab;
+    cursor:-moz-grab;
+    cursor:-webkit-grab;
     z-index: 1001;
     border-radius: 3px;
+}
+.reddit-map-lens.grabbing {
+    cursor:grabbing;
+    cursor:-moz-grabbing;
+    cursor:-webkit-grabbing;
 }
 
 .reddit-map-comment-node {

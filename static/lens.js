@@ -18,9 +18,14 @@ $(function(){
             lens.mousedown( function(e){
                 clicking = true;
                 click_offset = e.clientY-lens.position().top;
+                lens.addClass( 'grabbing' );
+                $(document).disableSelection();
                 
             }).mouseup( function(){
                 clicking = false;
+                lens.removeClass( 'grabbing' );
+                $(document).enableSelection();
+
             }).mousemove( function(e){
                 e.preventDefault();
                 if ( !clicking ) return;
