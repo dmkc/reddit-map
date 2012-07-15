@@ -4,7 +4,6 @@ $(function(){
         content      = $(document.createElement('div')).addClass('reddit-map-content'),
         lens_wrapper = $( document.createElement('div')).addClass('reddit-map-lens-wrapper'),
         lens         = $( document.createElement('div')).addClass('reddit-map-lens'),
-        height_ratio = $(window).height() / $(document).height(),
         clicking     = false,
         dragging     = false,
         click_offset = undefined,
@@ -66,14 +65,14 @@ $(function(){
                 lens.css( 'top', offset_top );
             });
 
-            //resize_lens();
+            resize_lens();
 
             lens.bind( 'drag', function lens_drag_handler(e,ui) {
                 dragging = true;
             });
 
             //setInterval( function(){ lens_move_handler() }, 20 );
-            //setInterval( function(){ lens_scroll_handler() }, 800 );
+            setInterval( function(){ lens_scroll_handler() }, 50 );
         },
 
         generate_map = function( parent, nodes ) {
@@ -81,13 +80,14 @@ $(function(){
             // each comment's height and descendants
             $.each( nodes, function(){//{{{
                 var $node = $(this),
+                    comment_text = $node.children('.entry').find('.usertext-body'),
                     comment_children = $node.children('.child').children('.sitetable').children('.comment'),
                     comment  = $(document.createElement('div')).addClass('reddit-map-comment'),
                     element  = $( document.createElement('div')).addClass('reddit-map-comment-element'), 
                     children = $( document.createElement('div')).addClass('reddit-map-comment-children');
 
                 // Set map elements' height to match with global height ratio
-                var elm_height = $node.children('.entry').find('.usertext-body').height(),
+                var elm_height = comment_text.height(),
                     lens_ratio = lens.height() / $(window).height()
                 element.height( Math.floor( lens_ratio * elm_height ) );
 
@@ -97,9 +97,9 @@ $(function(){
 
                 // hightlight comment
                 element.hover( function(e) {
-                    $node.css( 'background', '#faa' );
+                    comment_text.css( 'background', '#faa' );
                 }, function(e) {
-                    $node.css( 'background', '#fff' );
+                    comment_text.css( 'background', '#fff' );
                 });
 
                 parent.append( comment );
@@ -135,17 +135,17 @@ $(function(){
 
         // Resize lens based on window height
         resize_lens = function(e){
-            lens.height( $(window).height() * height_ratio );
+            var lens_height = Math.floor( $(window).height() * 
+                                 ( content.height() / reddit_content.height() ) );
+            lens.height( lens_height );
         },
         
         // Move lens as document scrolls
         lens_scroll_handler = function() {
             if ( dragging ) return;
             var lens_top = Math.floor( window.pageYOffset * 
-                          //( ($(window).height()-lens.height()) / $(document).height() ) );
-                          ( $(window).height() / $(document).height() ) );
+                          ( ($(window).height() - lens.height()) / reddit_content.height() ) );
             lens.css( 'top', lens_top );
-
         }
 
     map.append(  content );
