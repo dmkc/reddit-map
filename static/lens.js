@@ -1,12 +1,16 @@
 $(function(){
     // Create map panel on the right
-    var map          = $(document.createElement('div')).prop('id', 'reddit-map'),
-        content      = $(document.createElement('div')).addClass('reddit-map-content'),
+    var map          = $( document.createElement('div')).prop('id', 'reddit-map'),
+        content      = $( document.createElement('div')).addClass('reddit-map-content'),
         lens_wrapper = $( document.createElement('div')).addClass('reddit-map-lens-wrapper'),
         lens         = $( document.createElement('div')).addClass('reddit-map-lens'),
         clicking     = false,
         dragging     = false,
         click_offset = undefined,
+        Lens = {
+            opts: {}
+        },
+        Map = {},
 
         // boolean flags useful for debugging
         debug = { 
@@ -75,21 +79,39 @@ $(function(){
             setInterval( function(){ lens_scroll_handler() }, 50 );
         },
 
-        generate_map = function( parent, nodes ) {
+        generate_map = function( content, comments ) {
+            Lens.opts.map_scale = lens.height() / $(window).height();
+            //
+            // Create spacers for header and footer
+            var header = $( document.createElement('div') ).addClass('reddit-map-spacer'),
+                footer = header.clone()
+                map_scale = Lens.opts.map_scale;
+
+            header.css( 'height', Math.floor( $('#header').height() * map_scale ) );
+            footer.css( 'height', Math.floor( $('.footer-parent').height() * map_scale ) );
+
+            content.append( header );
+            generate_comments( content, comments );
+            content.append( footer );
+            
+        },
+
+        generate_comments = function( parent, nodes ) {
+
             // Walk through all the comments creating a map based on
             // each comment's height and descendants
             $.each( nodes, function(){//{{{
                 var $node = $(this),
+                    map_scale = Lens.opts.map_scale,
                     comment_text = $node.children('.entry').find('.usertext-body'),
                     comment_children = $node.children('.child').children('.sitetable').children('.comment'),
-                    comment  = $(document.createElement('div')).addClass('reddit-map-comment'),
+                    comment  = $( document.createElement('div')).addClass('reddit-map-comment'),
                     element  = $( document.createElement('div')).addClass('reddit-map-comment-element'), 
                     children = $( document.createElement('div')).addClass('reddit-map-comment-children');
 
                 // Set map elements' height to match with global height ratio
-                var elm_height = comment_text.height(),
-                    lens_ratio = lens.height() / $(window).height()
-                element.height( Math.floor( lens_ratio * elm_height ) );
+                var elm_height = comment_text.height();
+                element.height( Math.floor( map_scale * elm_height ) );
 
                 comment.append( element ).append( children );
                 // keep track of the original DOM node for the comment
@@ -106,12 +128,13 @@ $(function(){
 
                 // recurse on the comment's children
                 if( comment_children.length != 0 ) {
-                    generate_map( children, comment_children );
+                    generate_comments( children, comment_children );
                 }//}}}
+
             });
         },
 
-        // Scroll map proportionally to the document
+        // Scroll map proportionally with the document
         scroll_map = function() {
             if ( !debug.scroll_map ) return;
             var lens_ratio = ( content.height()- $(window).height() ) / 
