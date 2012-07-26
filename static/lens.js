@@ -1,37 +1,36 @@
 $(function(){
     // Create map panel on the right
-    var map          = $( document.createElement('div')).prop('id', 'reddit-map'),
-        content      = $( document.createElement('div')).addClass('reddit-map-content'),
-        lens_wrapper = $( document.createElement('div')).addClass('reddit-map-lens-wrapper'),
-        lens         = $( document.createElement('div')).addClass('reddit-map-lens'),
-        clicking     = false,
-        dragging     = false,
-        click_offset = undefined,
-        Lens = {
-            opts: {}
-        },
-        Map = {},
+    clicking     = false,
+    dragging     = false,
+    click_offset = undefined,
 
-        // boolean flags useful for debugging
-        debug = { 
-            scroll_map: true
-        };
-        
-   // Comment DOM nodes
-        reddit_content = $('.commentarea').children('.sitetable')
-        reddit_comments = reddit_content.children('.comment'),
-        init = function() {
-            init_map();
-            init_lens();
+    // Various reddit DOM elements
+    Reddit = {
+        dom : {
+            content  : undefined,
+            comments : undefined
+        },
+        init : function() {
+            this.content  = $('.commentarea').children('.sitetable');
+            this.comments = this.content.children('.comment');
+        }
+    },
+
+    Lens = {
+        opts : {
+            map_scale: 0.2
         },
 
-        init_map = function() { 
-            generate_map( content, reddit_comments );
-            setInterval( function(){ scroll_map() }, 20 );
+        dom : {
+            lens_wrapper : $( document.createElement('div')).addClass('reddit-map-lens-wrapper'),
+            lens         : $( document.createElement('div')).addClass('reddit-map-lens'),
         },
 
-        init_lens = function() {
-            lens.mousedown( function(e){
+        init : function() {
+            var that = this,
+                lens = this.dom.lens;
+
+            this.dom.lens.mousedown( function(e){
                 clicking = true;
                 click_offset = e.clientY-lens.position().top;
                 lens.addClass( 'grabbing' );
@@ -69,19 +68,65 @@ $(function(){
                 lens.css( 'top', offset_top );
             });
 
-            resize_lens();
+            this.resize_lens();
 
-            lens.bind( 'drag', function lens_drag_handler(e,ui) {
+            this.dom.lens.bind( 'drag', function lens_drag_handler(e,ui) {
                 dragging = true;
             });
 
             //setInterval( function(){ lens_move_handler() }, 20 );
-            setInterval( function(){ lens_scroll_handler() }, 50 );
+            setInterval( function(){ that.lens_scroll_handler() }, 50 );
+
+            this.dom.lens_wrapper.append( this.dom.lens );
+            this.dom.lens_wrapper.insertBefore( $(document.body).children().eq(0) );
         },
 
-        generate_map = function( content, comments ) {
-            Lens.opts.map_scale = lens.height() / $(window).height();
-            //
+        // Scroll document if user moves lens
+        lens_move_handler : function() {
+            if ( dragging ) {
+                dragging = false;
+                var lens_pos = lens.position(),
+                    pos = lens_pos.top  * Math.floor( 
+                            ( $(document).height() / ($(window).height() - lens.height()) ) );
+
+                window.scrollTo( 0, pos );
+            }
+        },
+
+        // Resize lens based on window height
+        resize_lens : function(e){
+            var lens_height = Math.floor( $(window).height() * 
+                                 ( Map.dom.content.height() / Reddit.content.height() ) );
+            this.dom.lens.height( lens_height );
+        },
+        
+        // Move lens as document scrolls
+        lens_scroll_handler : function() {
+            if ( dragging ) return;
+            var lens_top = Math.floor( window.pageYOffset * 
+                          ( ($(window).height() - this.dom.lens.height()) / Reddit.content.height() ) );
+            this.dom.lens.css( 'top', lens_top );
+        }
+        
+    },
+
+    Map = {
+        dom : {
+            map     : $( document.createElement('div')).prop('id', 'reddit-map'),
+            content : $( document.createElement('div')).addClass('reddit-map-content')
+        },
+
+        init : function() { 
+            var that = this;
+            this.dom.map.append( this.dom.content );
+            this.dom.map.insertBefore( $(document.body).children().eq(0));
+            this.generate_map( this.dom.content, Reddit.comments );
+            setInterval( function(){ 
+                that.scroll_map() 
+            }, 20 );
+        },
+
+        generate_map : function( content, comments ) {
             // Create spacers for header and footer
             var header = $( document.createElement('div') ).addClass('reddit-map-spacer'),
                 footer = header.clone()
@@ -90,17 +135,17 @@ $(function(){
             header.css( 'height', Math.floor( $('#header').height() * map_scale ) );
             footer.css( 'height', Math.floor( $('.footer-parent').height() * map_scale ) );
 
-            content.append( header );
-            generate_comments( content, comments );
-            content.append( footer );
-            
-        },
+            this.dom.content.append( header );
+            this.generate_comments( content, comments );
+            this.dom.content.append( footer );
+        },//}}}
 
-        generate_comments = function( parent, nodes ) {
+        // Walk through all the comments creating a map based on
+        // each comment's height and descendants
+        generate_comments : function( parent, nodes ) {
+            var that = this;
 
-            // Walk through all the comments creating a map based on
-            // each comment's height and descendants
-            $.each( nodes, function(){//{{{
+            $.each( nodes, function(){
                 var $node = $(this),
                     map_scale = Lens.opts.map_scale,
                     comment_text = $node.children('.entry').find('.usertext-body'),
@@ -128,61 +173,41 @@ $(function(){
 
                 // recurse on the comment's children
                 if( comment_children.length != 0 ) {
-                    generate_comments( children, comment_children );
-                }//}}}
+                    that.generate_comments( children, comment_children );
+                }
 
             });
         },
 
         // Scroll map proportionally with the document
-        scroll_map = function() {
-            if ( !debug.scroll_map ) return;
-            var lens_ratio = ( content.height()- $(window).height() ) / 
-                ( reddit_content.height() ),
-                offset = Math.floor( window.pageYOffset * lens_ratio );
+        scroll_map : function() {
+            if ( !Debug.scroll_map ) return;
+            var lens_ratio = 
+                ( this.dom.content.height() - $(window).height() ) / 
+                    Reddit.content.height(),
 
-            content.css( 'margin-top', -offset );
-        }
-        
-        // Scroll document if user moves lens
-        lens_move_handler = function() {
-            if ( dragging ) {
-                dragging = false;
-                var lens_pos = lens.position(),
-                    pos = lens_pos.top  * Math.floor( 
-                            ( $(document).height() / ($(window).height() - lens.height()) ) );
+                offset     = Math.floor( window.pageYOffset * lens_ratio );
 
-                window.scrollTo( 0, pos );
-            }
-        },
-
-        // Resize lens based on window height
-        resize_lens = function(e){
-            var lens_height = Math.floor( $(window).height() * 
-                                 ( content.height() / reddit_content.height() ) );
-            lens.height( lens_height );
-        },
-        
-        // Move lens as document scrolls
-        lens_scroll_handler = function() {
-            if ( dragging ) return;
-            var lens_top = Math.floor( window.pageYOffset * 
-                          ( ($(window).height() - lens.height()) / reddit_content.height() ) );
-            lens.css( 'top', lens_top );
+            this.dom.content.css( 'margin-top', -offset );
         }
 
-    map.append(  content );
-    map.insertBefore( $(document.body).children().eq(0));
+    },
 
-    lens_wrapper.append( lens );
-    lens_wrapper.insertBefore( $(document.body).children().eq(0) );
-
-    window.reddit_map = {
-        debug: debug
-    };
+    // Various parameters useful for debugging
+    Debug = { 
+        scroll_map: true
+    },
 
     // Vroom!
-    init();
+    Reddit.init();
+    Map.init();
+    Lens.init();
+
+    window.reddit_map = {
+        map: Map,
+        lens: Lens,
+        debug: Debug
+    };
 
 });
 
