@@ -18,7 +18,7 @@ $(function(){
 
     Lens = {
         opts : {
-            map_scale: 0.2
+            map_scale: 0.1
         },
 
         dom : {
@@ -130,9 +130,13 @@ $(function(){
             // Create spacers for header and footer
             var header = $( document.createElement('div') ).addClass('reddit-map-spacer'),
                 footer = header.clone()
-                map_scale = Lens.opts.map_scale;
+                map_scale = Lens.opts.map_scale,
+                header_height = $('#header').height() + 
+                    $('.sitetable.linklisting').height() +
+                    $('.panestack-title').height() + $('.menuarea').height() +
+                    $('.usertext.cloneable').height();
 
-            header.css( 'height', Math.floor( $('#header').height() * map_scale ) );
+            header.css( 'height', Math.floor( header_height * map_scale  ) );
             footer.css( 'height', Math.floor( $('.footer-parent').height() * map_scale ) );
 
             this.dom.content.append( header );
