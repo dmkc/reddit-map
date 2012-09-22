@@ -28,44 +28,56 @@ $(function(){
 
         init : function() {
             var that = this,
-                lens = this.dom.lens;
+                lens = this.dom.lens,
+                lens_wrapper = this.dom.lens_wrapper;
 
             this.dom.lens.mousedown( function(e){
                 clicking = true;
                 click_offset = e.clientY-lens.position().top;
                 lens.addClass( 'grabbing' );
                 $(document).disableSelection();
+
+                if(lens_wrapper[0].setCapture) { lens_wrapper[0].setCapture(); }
+
+                lens[0].unselectable = "on";
+                lens[0].onselectstart = function(){return false};
+                lens[0].style.userSelect = lens[0].style.MozUserSelect = "none";
+
                 
-            }).mouseup( function(){
-                clicking = false;
-                lens.removeClass( 'grabbing' );
-                $(document).enableSelection();
+            }).mousemove( function(){
+                $(window).mousemove(function(e){
+                    e.preventDefault();
+                    if ( !clicking ) return;
 
-            }).mousemove( function(e){
-                e.preventDefault();
-                if ( !clicking ) return;
+                    var lens_offset   = lens.offset(),
+                        lens_pos = lens.position();
 
-                var lens_offset   = lens.offset(),
-                    lens_pos = lens.position();
+                    dragging = true;
+                    // don't let the lens move beyond screen bounds
+                    if ( lens_pos.top < 0 || lens_pos.top > $(window).height() )
+                        return false;
 
-                dragging = true;
-                // don't let the lens move beyond screen bounds
-                if ( lens_pos.top < 0 || lens_pos.top > $(window).height() )
-                    return false;
+                    // Cancel dragging outside the document window
+                    if ( lens_offset.left > $(document).width() || 
+                        lens_pos.top > $(document).height() ) {
+                        dragging = false;
+                        return false;
+                    }
 
-                // Cancel dragging outside the document window
-                if ( lens_offset.left > $(document).width() || 
-                    lens_pos.top > $(document).height() ) {
-                    dragging = false;
-                    return false;
-                }
+                    var offset_top = Math.max( e.clientY - click_offset, 0 );
+                    
+                    if ( offset_top < 0 )
+                        return;
 
-                var offset_top = Math.max( e.clientY - click_offset, 0 );
-                
-                if ( offset_top < 0 )
-                    return;
+                    lens.css( 'top', offset_top );
+                }).mouseup( function(){
+                    clicking = false;
+                    lens.removeClass( 'grabbing' );
+                    $(document).enableSelection();
 
-                lens.css( 'top', offset_top );
+                    $(window).unbind('mousemove');
+
+                });
             });
 
             this.resize_lens();
@@ -74,11 +86,11 @@ $(function(){
                 dragging = true;
             });
 
-            //setInterval( function(){ lens_move_handler() }, 20 );
+            //setInterval( function(){ lens_move_handler() }, 100 );
             setInterval( function(){ that.lens_scroll_handler() }, 50 );
 
             this.dom.lens_wrapper.append( this.dom.lens );
-            this.dom.lens_wrapper.insertBefore( $(document.body).children().eq(0) );
+            this.dom.lens_wrapper.insertAfter( $(document.body) );
         },
 
         // Scroll document if user moves lens
@@ -97,7 +109,7 @@ $(function(){
         resize_lens : function(e){
             var lens_height = Math.floor( $(window).height() * 
                                  ( Map.dom.content.height() / Reddit.content.height() ) );
-            this.dom.lens.height( lens_height );
+            this.dom.lens.height( 100 );
         },
         
         // Move lens as document scrolls
@@ -204,7 +216,7 @@ $(function(){
 
     // Vroom!
     Reddit.init();
-    Map.init();
+    //Map.init();
     Lens.init();
 
     window.reddit_map = {

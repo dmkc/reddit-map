@@ -4453,6 +4453,8 @@ tr.gold-accent + tr > td {
     position: fixed;
     top: 0;
     right: 0;
+    width: 9999px;
+    height:999px;
 }
 
 .reddit-map-lens {
